@@ -27,3 +27,10 @@ tsconfig.app.json - Konfiguracja typów dla Reacta i przeglądarki (folder src/)
 tsconfig.node.json - Konfiguracja typów dla narzędzi budujących (np. vite.config.ts)
 
 Jako że tworzę aplikację w strukturze monorepo to będę używał OpenAPI + Orval aby nie musieć kopiować typów między projektami
+
+.gitattributes z linijką * text=auto eol=lf pozwala ustawić standarnd nowej lini w całym projekcie, stosowany w linux/mac który jest aktualnie rekomendowany
+W powyższym wypadku warto dać do prettiera "endOfLine": "lf" by też wymagał tych samych zakończeń lini.
+
+turbo.json od Turborepo pozwala orkiestrować zadania, inteligentnie keszuje, definiuje zaelżności między skryptami i wskazuje pliki wyjściowe.
+
+nest-cli.json pozwala na automatyczne czytanie reguł z class-validator czy z komentarzy czy z plików dto/entity do swaggera dzięki aktualnym ustawieniom

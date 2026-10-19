@@ -1,0 +1,20 @@
+{
+  "name": "house-organizer-monorepo",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "generate:api": "turbo run generate:api",
+    "lint:oxlint": "oxlint .",
+    "lint:eslint": "turbo run lint",
+    "lint": "pnpm lint:oxlint && pnpm lint:eslint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "oxlint": "^1.88.0",
+    "prettier": "^3.9.10",
+    "turbo": "^2.11.9"
+  }
+}
