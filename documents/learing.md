@@ -20,3 +20,10 @@ Przedrostki przy komentarzach:
 - test: (testing) – Dodanie lub poprawa testów automatycznych.
 - perf: (performance) – Zmiana kodu mająca na celu poprawę wydajności aplikacji.
 - ci: (continuous integration) – Zmiany w plikach konfiguracyjnych potoków CI/CD.
+
+vite.config.ts - Konfiguracja serwera deweloperskiego i budowania aplikacji Vite 
+tsconfig.json - Główny spis treści łączący pozostałe pliki TypeScriptu
+tsconfig.app.json - Konfiguracja typów dla Reacta i przeglądarki (folder src/)
+tsconfig.node.json - Konfiguracja typów dla narzędzi budujących (np. vite.config.ts)
+
+Jako że tworzę aplikację w strukturze monorepo to będę używał OpenAPI + Orval aby nie musieć kopiować typów między projektami
