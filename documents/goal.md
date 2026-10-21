@@ -1,0 +1,1 @@
+Celem tworzenia tego systemu jest napsianie całego projektu bez używania agentów AI.

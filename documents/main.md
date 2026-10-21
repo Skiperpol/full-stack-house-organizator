@@ -93,3 +93,13 @@ Endpointy:
 - POST /api/v1/auth/register
 - POST /api/v1/auth/me
 - POST /api/v1/auth/logout
+
+Uwierzytelnianie:
+- JWT przechowywane w ciasteczku HttpOnly
+Dlaczego?
+- Jako że jest to monolit REST API + SPA to backend pozostaje bezstanowy jeśli chodzi o weryfikowanie JWT, a frontend nie musi ręcznie zarządzać tokenami w pamięci i dzięki fladze HttpOnly JavaScript na frontendzie nie ma dostępu do tokena.
+
+Architekruta:
+- Feature-Driven (Feature-based)
+Dlaczego?
+- Uważam że ta architektura najlepiej nadaje się do tej skali projektu i natywną modułowość NestJS. Dodatkowo chcę aby projekt był czytelny, łatwy w utrzymaniu oraz rozbudowie, w czym pomoże mi zachowanie wysokiej kohezji w modułach.
