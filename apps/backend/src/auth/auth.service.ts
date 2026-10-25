@@ -1,26 +1,74 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto.js';
-import { UpdateAuthDto } from './dto/update-auth.dto.js';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { UsersService } from '@/users/users.service.js';
+import * as bcrypt from 'bcrypt';
+import { SessionService } from '@/session/session.service.js';
+import { CreateUserDto } from '@/users/dto/create-user.dto';
+import { Role } from '@prisma/client';
+import { User } from '@prisma/client';
+import { UserEntity } from '@/users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly sessionService: SessionService,
+  ) {}
+
+  async register(createUserDto: CreateUserDto, role: Role = Role.USER) {
+    const user = await this.usersService.create(createUserDto, role);
+    const sessionId = await this.sessionService.createSession({
+      uuid: user.uuid,
+      role: user.role,
+    });
+
+    return {
+      sessionId,
+      user: new UserEntity(user),
+    };
   }
 
-  findAll() {
-    return `This action returns all auth`;
+  async login(email: string, pass: string) {
+    const user = await this.validateUser(email, pass);
+    const sessionId = await this.sessionService.createSession({
+      uuid: user.uuid,
+      role: user.role,
+    });
+
+    return {
+      sessionId,
+      user: new UserEntity(user),
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
+  async getMe(uuid: string): Promise<UserEntity> {
+    const user = await this.usersService.findByUUID(uuid);
+
+    if (!user) {
+      throw new UnauthorizedException('Użytkownik nie istnieje');
+    }
+
+    return user;
   }
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
+  async validateUser(email: string, password: string): Promise<User> {
+    const user = await this.usersService.findByEmailWithPassword(email);
+
+    const isPasswordValid = user
+      ? await bcrypt.compare(password, user.password)
+      : false;
+
+    if (!user || !isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    return user;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+  async logout(sessionId: string, uuid: string): Promise<void> {
+    await this.sessionService.logout(sessionId, uuid);
+  }
+
+  async logoutFromAllDevices(uuid: string): Promise<void> {
+    await this.sessionService.logoutFromAllDevices(uuid);
   }
 }
