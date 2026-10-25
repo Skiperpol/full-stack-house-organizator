@@ -16,12 +16,60 @@ enum Role {
   ADMIN
 }
 
+enum FamilyRole {
+  OWNER
+  MEMBER
+}
+
 model User {
   id        Int      @id @default(autoincrement())
-  uuid      String   @unique @default(uuid())
+  uuid      String   @unique @default(uuid(7)) @db.Uuid
   email     String   @unique
   name      String
   password  String
   role      Role     @default(USER)
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  families  FamilyMember[]
+  invites   FamilyInvite[]
+
+  @@map("users")
+}
+
+model FamilyMember {
+  userId    Int
+  familyId  Int
+  role      FamilyRole @default(MEMBER)
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  family  Family  @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@id([userId, familyId])
+  @@map("family_members")
+}
+
+model Family {
+  id        Int     @id @default(autoincrement())
+  uuid      String  @unique @default(uuid(7)) @db.Uuid
+  name      String
+  createdAt DateTime @default(now()) 
+  updatedAt DateTime @updatedAt
+  members   FamilyMember[]
+  invites   FamilyInvite[]
+
+  @@map("families")
+}
+
+model FamilyInvite {
+  id        Int     @id @default(autoincrement())
+  token     String     @unique @default(uuid(7)) @db.Uuid
+  familyId  Int
+  invitedById Int
+  expiresAt DateTime
+  createdAt DateTime @default(now()) 
+
+  family    Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  invitedBy User   @relation(fields: [invitedById], references: [id], onDelete: Cascade)
+
+  @@map("family_invites")
 }
