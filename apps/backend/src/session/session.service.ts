@@ -75,13 +75,6 @@ export class SessionService {
     const userSessionsKey = toUserSessionKey(uuid);
     const sessionKeys = await this.redisService.getSetMembers(userSessionsKey);
 
-    if (sessionKeys.length > 0) {
-      await Promise.all([
-        this.redisService.del(...sessionKeys),
-        this.redisService.del(userSessionsKey),
-      ]);
-    } else {
-      await this.redisService.del(userSessionsKey);
-    }
+    await this.redisService.del(...sessionKeys, userSessionsKey);
   }
 }
