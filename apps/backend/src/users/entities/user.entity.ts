@@ -12,6 +12,7 @@ export class UserEntity implements User {
 
   role: Role;
   createdAt: Date;
+  updatedAt: Date;
 
   constructor(partial: Partial<UserEntity>) {
     Object.assign(this, partial);
