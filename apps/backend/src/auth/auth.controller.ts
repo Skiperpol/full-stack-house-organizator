@@ -71,11 +71,11 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('logout')
   async logout(
-    @CurrentUser('uuid') uuid: string,
+    @CurrentUser('id') userId: number,
     @SessionId() sessionId: string,
     @Res({ passthrough: true }) response: Response,
   ): Promise<{ message: string }> {
-    await this.authService.logout(sessionId, uuid);
+    await this.authService.logout(sessionId, userId);
     this.clearSessionCookie(response);
 
     return { message: 'Successfully logged out' };
@@ -85,10 +85,10 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('logout-all')
   async logoutFromAllDevices(
-    @CurrentUser('uuid') uuid: string,
+    @CurrentUser('id') userId: number,
     @Res({ passthrough: true }) response: Response,
   ): Promise<{ message: string }> {
-    await this.authService.logoutFromAllDevices(uuid);
+    await this.authService.logoutFromAllDevices(userId);
     this.clearSessionCookie(response);
 
     return { message: 'Successfully logged out from all devices' };
@@ -96,8 +96,8 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Get('me')
-  async getMe(@CurrentUser('uuid') uuid: string): Promise<UserEntity> {
-    return this.authService.getMe(uuid);
+  async getMe(@CurrentUser('id') userId: number): Promise<UserEntity> {
+    return this.authService.getMe(userId);
   }
 
   private setSessionCookie(response: Response, sessionId: string): void {
@@ -113,8 +113,12 @@ export class AuthController {
   }
 
   private clearSessionCookie(response: Response): void {
-    response.clearCookie('sessionId', {
+    const isProduction =
+      this.configService.get<string>('NODE_ENV') === 'production';
+
+    response.cookie('sessionId', {
       httpOnly: true,
+      secure: isProduction,
       sameSite: 'lax',
     });
   }

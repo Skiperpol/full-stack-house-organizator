@@ -17,6 +17,7 @@ export class AuthService {
   async register(createUserDto: CreateUserDto, role: Role = Role.USER) {
     const user = await this.usersService.create(createUserDto, role);
     const sessionId = await this.sessionService.createSession({
+      id: user.id,
       uuid: user.uuid,
       role: user.role,
     });
@@ -30,6 +31,7 @@ export class AuthService {
   async login(email: string, pass: string) {
     const user = await this.validateUser(email, pass);
     const sessionId = await this.sessionService.createSession({
+      id: user.id,
       uuid: user.uuid,
       role: user.role,
     });
@@ -40,11 +42,11 @@ export class AuthService {
     };
   }
 
-  async getMe(uuid: string): Promise<UserEntity> {
-    const user = await this.usersService.findByUUID(uuid);
+  async getMe(userId: number): Promise<UserEntity> {
+    const user = await this.usersService.findById(userId);
 
     if (!user) {
-      throw new UnauthorizedException('Użytkownik nie istnieje');
+      throw new UnauthorizedException('User does not exists');
     }
 
     return user;
@@ -64,11 +66,11 @@ export class AuthService {
     return user;
   }
 
-  async logout(sessionId: string, uuid: string): Promise<void> {
-    await this.sessionService.logout(sessionId, uuid);
+  async logout(sessionId: string, id: number): Promise<void> {
+    await this.sessionService.logout(sessionId, id);
   }
 
-  async logoutFromAllDevices(uuid: string): Promise<void> {
-    await this.sessionService.logoutFromAllDevices(uuid);
+  async logoutFromAllDevices(id: number): Promise<void> {
+    await this.sessionService.logoutFromAllDevices(id);
   }
 }

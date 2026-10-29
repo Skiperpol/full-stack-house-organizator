@@ -17,7 +17,7 @@ export class SessionService {
   async createSession(sessionData: SessionData): Promise<string> {
     const rawSessionId = randomUUID();
     const sessionKey = toSessionKey(rawSessionId);
-    const userSessionsKey = toUserSessionKey(sessionData.uuid);
+    const userSessionsKey = toUserSessionKey(sessionData.id);
 
     await this.redisService.setJson(sessionKey, sessionData, this.SESSION_TTL);
     await this.redisService.addToSet(
@@ -36,7 +36,7 @@ export class SessionService {
       await this.redisService.getJson<SessionData>(sessionKey);
     if (!sessionData) return null;
 
-    this.refreshSessionIfNeeded(sessionKey, sessionData.uuid).catch((err) => {
+    this.refreshSessionIfNeeded(sessionKey, sessionData.id).catch((err) => {
       this.logger.error(
         `Failed to refresh session TTL for key: ${sessionKey}`,
         err,
@@ -48,12 +48,12 @@ export class SessionService {
 
   private async refreshSessionIfNeeded(
     sessionKey: string,
-    uuid: string,
+    userId: number,
   ): Promise<void> {
     const remainingTtl = await this.redisService.getTtl(sessionKey);
 
     if (remainingTtl > 0 && remainingTtl < this.REFRESH_THRESHOLD) {
-      const userSessionsKey = toUserSessionKey(uuid);
+      const userSessionsKey = toUserSessionKey(userId);
 
       await Promise.all([
         this.redisService.expire(sessionKey, this.SESSION_TTL),
@@ -61,9 +61,9 @@ export class SessionService {
       ]);
     }
   }
-  async logout(sessionId: string, uuid: string): Promise<void> {
+  async logout(sessionId: string, userId: number): Promise<void> {
     const sessionKey = toSessionKey(sessionId);
-    const userSessionsKey = toUserSessionKey(uuid);
+    const userSessionsKey = toUserSessionKey(userId);
 
     await Promise.all([
       this.redisService.del(sessionKey),
@@ -71,8 +71,8 @@ export class SessionService {
     ]);
   }
 
-  async logoutFromAllDevices(uuid: string): Promise<void> {
-    const userSessionsKey = toUserSessionKey(uuid);
+  async logoutFromAllDevices(userId: number): Promise<void> {
+    const userSessionsKey = toUserSessionKey(userId);
     const sessionKeys = await this.redisService.getSetMembers(userSessionsKey);
 
     await this.redisService.del(...sessionKeys, userSessionsKey);
